@@ -1,0 +1,21 @@
+{
+    "name": "Extreal.Integration.Assets.Addressables",
+    "rootNamespace": "Extreal.Integration.Assets.Addressables",
+    "references": [
+        "Extreal.Core.Logging",
+        "Extreal.Core.Common",
+        "Unity.Addressables",
+        "UniTask",
+        "UniRx",
+        "Extreal.Framework.Analyzer"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
