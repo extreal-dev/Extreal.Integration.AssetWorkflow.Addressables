@@ -1,0 +1,19 @@
+name: Check analyzer existence
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  check-analyzer-existence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+        with:
+          repository: extreal-dev/check-analyzer-existence-action
+          ref: main
+          path: .github/actions/check-analyzer-existence
+      - uses: ./.github/actions/check-analyzer-existence
