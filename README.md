@@ -1,0 +1,1 @@
+# Extreal.Integration.Assets.Addressables
