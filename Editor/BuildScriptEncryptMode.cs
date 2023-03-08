@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Extreal.Integration.Assets.Addressables.ResourceProviders;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Build;
@@ -1284,7 +1285,7 @@ namespace Extreal.Integration.Assets.Addressables.Editor
                 var provider = schema.AssetBundleProviderType.Value
                                 .GetConstructor(Array.Empty<Type>())
                                 .Invoke(default) as CryptoAssetBundleProviderBase;
-                using var encryptor = provider.CryptoStreamGetter.GetEncryptStream(destStream, options);
+                using var encryptor = provider.CryptoStreamFactory.CreateEncryptStream(destStream, options);
                 srcStream.CopyTo(encryptor);
             }
 

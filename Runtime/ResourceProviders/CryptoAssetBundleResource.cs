@@ -9,7 +9,7 @@ using UnityEngine.ResourceManagement.Util;
 using AsyncOperation = UnityEngine.AsyncOperation;
 
 
-namespace Extreal.Integration.Assets.Addressables
+namespace Extreal.Integration.Assets.Addressables.ResourceProviders
 {
     public class CustomAssetBundleResource : IAssetBundleResource
     {
@@ -24,7 +24,7 @@ namespace Extreal.Integration.Assets.Addressables
         private UnityWebRequestAsyncOperation uwrAsyncOperation;
         private ProvideHandle provideHandle;
         private readonly AssetBundleRequestOptions options;
-        private readonly ICryptoStreamGetter cryptoStreamGetter;
+        private readonly ICryptoStreamFactory cryptoStreamFactory;
         private string transformedInternalId;
         private string downloadFilePath;
         private string bundleFilePath;
@@ -43,10 +43,10 @@ namespace Extreal.Integration.Assets.Addressables
             }
         }
 
-        public CustomAssetBundleResource(ProvideHandle provideHandle, ICryptoStreamGetter cryptoStreamGetter)
+        public CustomAssetBundleResource(ProvideHandle provideHandle, ICryptoStreamFactory cryptoStreamFactory)
         {
             this.provideHandle = provideHandle;
-            this.cryptoStreamGetter = cryptoStreamGetter;
+            this.cryptoStreamFactory = cryptoStreamFactory;
             this.provideHandle.SetProgressCallback(GetProgress);
             this.provideHandle.SetDownloadProgressCallbacks(GetDownloadStatus);
             options = this.provideHandle.Location?.Data as AssetBundleRequestOptions;
@@ -252,7 +252,7 @@ namespace Extreal.Integration.Assets.Addressables
             }
 
             using var srcStream = new FileStream(downloadFilePath, FileMode.Open, FileAccess.Read);
-            using var decryptor = cryptoStreamGetter.GetDecryptStream(srcStream, options);
+            using var decryptor = cryptoStreamFactory.CreateDecryptStream(srcStream, options);
             using var destStream = new FileStream(bundleFilePath, FileMode.OpenOrCreate, FileAccess.Write);
             decryptor.CopyTo(destStream);
         }

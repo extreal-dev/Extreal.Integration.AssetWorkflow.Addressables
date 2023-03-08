@@ -3,15 +3,15 @@ using UnityEngine;
 using UnityEngine.ResourceManagement.ResourceLocations;
 using UnityEngine.ResourceManagement.ResourceProviders;
 
-namespace Extreal.Integration.Assets.Addressables
+namespace Extreal.Integration.Assets.Addressables.ResourceProviders
 {
     public abstract class CryptoAssetBundleProviderBase : ResourceProviderBase
     {
-        public abstract ICryptoStreamGetter CryptoStreamGetter { get; }
+        public abstract ICryptoStreamFactory CryptoStreamFactory { get; }
 
         public override void Provide(ProvideHandle providerInterface)
         {
-            var res = new CustomAssetBundleResource(providerInterface, CryptoStreamGetter);
+            var res = new CustomAssetBundleResource(providerInterface, CryptoStreamFactory);
             res.Fetch();
         }
 
