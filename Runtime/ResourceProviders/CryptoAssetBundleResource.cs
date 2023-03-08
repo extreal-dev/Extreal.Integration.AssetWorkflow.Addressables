@@ -26,7 +26,6 @@ namespace Extreal.Integration.Assets.Addressables.ResourceProviders
         private readonly AssetBundleRequestOptions options;
         private readonly ICryptoStreamFactory cryptoStreamFactory;
         private string transformedInternalId;
-        private string downloadFilePath;
         private string bundleFilePath;
 
         private long bytesToDownload = -1;
@@ -123,8 +122,7 @@ namespace Extreal.Integration.Assets.Addressables.ResourceProviders
                 loadType = LoadType.Local;
             }
 
-            downloadFilePath = Path.GetFullPath("Temp/com.unity.addressables/Encrypted/" + Path.GetFileName(path));
-            bundleFilePath = Path.GetFullPath("Temp/com.unity.addressables/Decrypted/" + Path.GetFileName(path));
+            bundleFilePath = Path.GetFullPath("Temp/com.unity.addressables/AssetBundle/" + Path.GetFileName(path));
         }
 
         private static void AddCallbackInvokeIfDone(AsyncOperation operation, Action<AsyncOperation> callback)
@@ -153,10 +151,6 @@ namespace Extreal.Integration.Assets.Addressables.ResourceProviders
                 uwrAsyncOperation?.webRequest.Dispose();
                 uwrAsyncOperation = null;
 
-                if (File.Exists(downloadFilePath))
-                {
-                    File.Delete(downloadFilePath);
-                }
                 if (File.Exists(bundleFilePath))
                 {
                     File.Delete(bundleFilePath);
@@ -211,7 +205,7 @@ namespace Extreal.Integration.Assets.Addressables.ResourceProviders
             var uwr = new UnityWebRequest(path)
             {
                 disposeDownloadHandlerOnDispose = true,
-                downloadHandler = new DownloadHandlerFile(downloadFilePath)
+                downloadHandler = new DownloadHandlerFileWithDecryption(bundleFilePath, cryptoStreamFactory, options)
             };
 
             if (options.RedirectLimit > 0)
@@ -238,23 +232,8 @@ namespace Extreal.Integration.Assets.Addressables.ResourceProviders
                     provideHandle.Complete<CustomAssetBundleResource>(null, false, exception);
                     return;
                 }
-                Decrypt(downloadFilePath);
                 GetAssetBundleFromCacheOrFile();
             };
-        }
-
-        private void Decrypt(string downloadFilePath)
-        {
-            var bundleDirectoryPath = Path.GetDirectoryName(bundleFilePath);
-            if (!Directory.Exists(bundleDirectoryPath))
-            {
-                _ = Directory.CreateDirectory(bundleDirectoryPath);
-            }
-
-            using var srcStream = new FileStream(downloadFilePath, FileMode.Open, FileAccess.Read);
-            using var decryptor = cryptoStreamFactory.CreateDecryptStream(srcStream, options);
-            using var destStream = new FileStream(bundleFilePath, FileMode.OpenOrCreate, FileAccess.Write);
-            decryptor.CopyTo(destStream);
         }
 
         private void GetAssetBundleFromCacheOrFile()
