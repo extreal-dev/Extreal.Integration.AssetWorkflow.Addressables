@@ -20,13 +20,13 @@ namespace Extreal.Integration.Assets.Addressables
     [SuppressMessage("Design", "CC0091")]
     public class AssetProvider : DisposableBase
     {
-        public IObservable<Unit> OnDownloading => onDownloading.AddTo(disposables);
+        public IObservable<string> OnDownloading => onDownloading.AddTo(disposables);
         [SuppressMessage("Usage", "CC0033")]
-        private readonly Subject<Unit> onDownloading = new Subject<Unit>();
+        private readonly Subject<string> onDownloading = new Subject<string>();
 
-        public IObservable<DownloadStatus> OnDownloaded => onDownloaded.AddTo(disposables);
+        public IObservable<NamedDownloadStatus> OnDownloaded => onDownloaded.AddTo(disposables);
         [SuppressMessage("Usage", "CC0033")]
-        private readonly Subject<DownloadStatus> onDownloaded = new Subject<DownloadStatus>();
+        private readonly Subject<NamedDownloadStatus> onDownloaded = new Subject<NamedDownloadStatus>();
 
         private readonly CompositeDisposable disposables = new CompositeDisposable();
 
@@ -57,11 +57,11 @@ namespace Extreal.Integration.Assets.Addressables
 
         private async UniTask DownloadDependenciesAsync(string assetName, TimeSpan interval = default)
         {
-            onDownloading.OnNext(Unit.Default);
+            onDownloading.OnNext(assetName);
 
             var handle = Addressables.DownloadDependenciesAsync(assetName);
 
-            onDownloaded.OnNext(handle.GetDownloadStatus());
+            onDownloaded.OnNext(new NamedDownloadStatus(assetName, handle.GetDownloadStatus()));
             var downloadStatus = default(DownloadStatus);
             while (handle.Status == AsyncOperationStatus.None) // None: the operation is still in progress.
             {
@@ -69,7 +69,7 @@ namespace Extreal.Integration.Assets.Addressables
                 downloadStatus = handle.GetDownloadStatus();
                 if (prevDownloadStatus.DownloadedBytes != downloadStatus.DownloadedBytes)
                 {
-                    onDownloaded.OnNext(downloadStatus);
+                    onDownloaded.OnNext(new NamedDownloadStatus(assetName, downloadStatus));
                 }
                 if (interval == default)
                 {
@@ -80,7 +80,7 @@ namespace Extreal.Integration.Assets.Addressables
                     await UniTask.Delay(interval);
                 }
             }
-            onDownloaded.OnNext(handle.GetDownloadStatus());
+            onDownloaded.OnNext(new NamedDownloadStatus(assetName, handle.GetDownloadStatus()));
 
             ReleaseHandle(handle);
         }
