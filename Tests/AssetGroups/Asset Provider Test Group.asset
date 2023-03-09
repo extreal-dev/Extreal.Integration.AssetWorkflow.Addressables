@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Asset Provider Test Group
+  m_EditorClassIdentifier: 
+  m_GroupName: Asset Provider Test Group
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 2a7b718ea4d122c4898b6d3f4b6f11af
+  m_SerializeEntries:
+  - m_GUID: f2eca45385ea2b34a873c07c618dafac
+    m_Address: Cube
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: 1bd24cc6463253d4c89bab6d6d75813a
+    m_Address: TestObject
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: 97ce596aefd5f4b4f9f91955ec09f105
+    m_Address: AdditiveScene
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: ccb38ed2c7410314fa3fcf01b1cf9e8c, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: fd12b11b5254a434f916383cb13f43bf, type: 2}
+    - {fileID: 11400000, guid: 8e5eac5223c29b149ae925cd87424192, type: 2}

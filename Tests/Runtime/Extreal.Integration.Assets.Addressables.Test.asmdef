@@ -8,6 +8,7 @@
         "Extreal.Core.Logging",
         "Extreal.Core.Common",
         "Unity.Addressables",
+        "Unity.ResourceManager",
         "UniTask",
         "UniRx",
         "Extreal.Framework.Analyzer"

@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Failed Crypto Group
+  m_EditorClassIdentifier: 
+  m_GroupName: Failed Crypto Group
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 55b9d273ed3c8b74785943b8bbc5dc11
+  m_SerializeEntries:
+  - m_GUID: ddcbf965975b4684aab7e757d22f5436
+    m_Address: FailedCryptoCube
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: ccb38ed2c7410314fa3fcf01b1cf9e8c, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 42f23593d0818af458d3d2d8ad0f5bdd, type: 2}
+    - {fileID: 11400000, guid: e5baa8bb27c17324ba9fbda64301806e, type: 2}
