@@ -11,7 +11,7 @@ namespace Extreal.Integration.Assets.Addressables.ResourceProviders
 
         public override void Provide(ProvideHandle providerInterface)
         {
-            var res = new CustomAssetBundleResource(providerInterface, CryptoStreamFactory);
+            var res = new CryptoAssetBundleResource(providerInterface, CryptoStreamFactory);
             res.Fetch();
         }
 
@@ -30,7 +30,7 @@ namespace Extreal.Integration.Assets.Addressables.ResourceProviders
                 return;
             }
 
-            if (asset is CustomAssetBundleResource bundle)
+            if (asset is CryptoAssetBundleResource bundle)
             {
                 bundle.Unload();
             }

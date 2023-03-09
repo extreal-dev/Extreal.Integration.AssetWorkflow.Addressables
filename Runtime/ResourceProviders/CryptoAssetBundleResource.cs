@@ -11,7 +11,7 @@ using AsyncOperation = UnityEngine.AsyncOperation;
 
 namespace Extreal.Integration.Assets.Addressables.ResourceProviders
 {
-    public class CustomAssetBundleResource : IAssetBundleResource
+    public class CryptoAssetBundleResource : IAssetBundleResource
     {
         private enum LoadType
         {
@@ -42,7 +42,7 @@ namespace Extreal.Integration.Assets.Addressables.ResourceProviders
             }
         }
 
-        public CustomAssetBundleResource(ProvideHandle provideHandle, ICryptoStreamFactory cryptoStreamFactory)
+        public CryptoAssetBundleResource(ProvideHandle provideHandle, ICryptoStreamFactory cryptoStreamFactory)
         {
             this.provideHandle = provideHandle;
             this.cryptoStreamFactory = cryptoStreamFactory;
@@ -94,7 +94,7 @@ namespace Extreal.Integration.Assets.Addressables.ResourceProviders
                     $"Invalid path in AssetBundleProvider: '{transformedInternalId}'.",
                     provideHandle.Location
                 );
-                provideHandle.Complete<CustomAssetBundleResource>(null, false, exception);
+                provideHandle.Complete<CryptoAssetBundleResource>(null, false, exception);
             }
         }
 
@@ -179,7 +179,6 @@ namespace Extreal.Integration.Assets.Addressables.ResourceProviders
                     $"Invalid path in AssetBundleProvider: '{transformedInternalId}'.",
                     provideHandle.Location
                 );
-                provideHandle.Complete<CustomAssetBundleResource>(null, false, exception);
 
 #if ENABLE_CACHING
                 if (!string.IsNullOrEmpty(options.Hash))
@@ -191,6 +190,7 @@ namespace Extreal.Integration.Assets.Addressables.ResourceProviders
                     }
                 }
 #endif
+                provideHandle.Complete<CryptoAssetBundleResource>(null, false, exception);
             }
         }
 
@@ -229,7 +229,7 @@ namespace Extreal.Integration.Assets.Addressables.ResourceProviders
                         $"Download has failed. result:{uwr.result} path:{path}",
                         provideHandle.Location
                     );
-                    provideHandle.Complete<CustomAssetBundleResource>(null, false, exception);
+                    provideHandle.Complete<CryptoAssetBundleResource>(null, false, exception);
                     return;
                 }
                 GetAssetBundleFromCacheOrFile();
