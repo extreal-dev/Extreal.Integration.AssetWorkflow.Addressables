@@ -35,7 +35,7 @@ namespace Extreal.Integration.Assets.Addressables.Editor
     /// <summary>
     /// Build scripts used for player builds and running with bundles in the editor.
     /// </summary>
-    [CreateAssetMenu(fileName = "BuildScriptEncrypt.asset", menuName = "Addressables/Content Builders/Encrypt Build Script")]
+    [CreateAssetMenu(fileName = "BuildScriptEncrypt.asset", menuName = "Extreal/Integration.Assets.Addressables.Editor/Encrypt Build Script")]
     public class BuildScriptEncryptMode : BuildScriptBase
     {
         /// <inheritdoc />
@@ -1114,14 +1114,18 @@ namespace Extreal.Integration.Assets.Addressables.Editor
                     outputBundles[i] = StripHashFromBundleLocation(outputBundles[i]);
 
                 bundleRenameMap.Add(buildBundles[i], outputBundles[i]);
-
                 //========================================================================================
                 // POSTSCRIPT
                 // If the group's schema has a custom Provider that reads while decrypting, encrypt it.
                 // Otherwise, use the original processing.
-                if (typeof(CryptoAssetBundleProviderBase).IsAssignableFrom(schema.AssetBundleProviderType.Value))
+                var loadPath = schema.LoadPath.GetValue(assetGroup.Settings);
+                var options = dataEntry.Data as AssetBundleRequestOptions;
+
+                if (typeof(CryptoAssetBundleProviderBase).IsAssignableFrom(schema.AssetBundleProviderType.Value)
+                    && (ResourceManagerConfig.ShouldPathUseWebRequest(loadPath)
+                        || options.UseUnityWebRequestForLocalBundles))
                 {
-                    Encrypt(srcPath, targetPath, schema, dataEntry.Data as AssetBundleRequestOptions);
+                    Encrypt(srcPath, targetPath, schema, options);
                 }
                 else
                 {
