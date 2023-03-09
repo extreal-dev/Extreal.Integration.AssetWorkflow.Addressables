@@ -1,5 +1,5 @@
-using System;
 using System.IO;
+using Extreal.Core.Logging;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -42,6 +42,8 @@ namespace Extreal.Integration.Assets.Addressables.ResourceProviders
             }
         }
 
+        private static readonly ELogger Logger = LoggingManager.GetLogger(nameof(CryptoAssetBundleResource));
+
         public CryptoAssetBundleResource(ProvideHandle provideHandle, ICryptoStreamFactory cryptoStreamFactory)
         {
             this.provideHandle = provideHandle;
@@ -65,7 +67,7 @@ namespace Extreal.Integration.Assets.Addressables.ResourceProviders
             };
 
             var downloadedBytes = 0L;
-            if (BytesToDownload > 0 && uwrAsyncOperation != null
+            if (BytesToDownload > 0L && uwrAsyncOperation != null
                 && string.IsNullOrEmpty(uwrAsyncOperation.webRequest.error))
             {
                 downloadedBytes = (long)uwrAsyncOperation.webRequest.downloadedBytes;
@@ -80,8 +82,8 @@ namespace Extreal.Integration.Assets.Addressables.ResourceProviders
             GetLoadInfo(provideHandle, out var loadType, out transformedInternalId);
             if (loadType == LoadType.Local)
             {
-                var requestOperation = AssetBundle.LoadFromFileAsync(transformedInternalId, options?.Crc ?? 0);
-                AddCallbackInvokeIfDone(requestOperation, RequestOperationToGetAssetBundleCompleted);
+                AssetBundle.LoadFromFileAsync(transformedInternalId, options?.Crc ?? 0)
+                    .completed += RequestOperationToGetAssetBundleCompleted;
             }
             else if (loadType == LoadType.Web)
             {
@@ -110,31 +112,34 @@ namespace Extreal.Integration.Assets.Addressables.ResourceProviders
             path = handle.ResourceManager.TransformInternalId(handle.Location);
             if (ResourceManagerConfig.ShouldPathUseWebRequest(path))
             {
+                if (Logger.IsDebug())
+                {
+                    Logger.LogDebug($"Download from remote for the Asset Bundle in {transformedInternalId}");
+                }
+
                 loadType = LoadType.Web;
             }
             else if (options.UseUnityWebRequestForLocalBundles)
             {
+                if (Logger.IsDebug())
+                {
+                    Logger.LogDebug($"Download from local using UnityWebRequest for the Asset Bundle in {transformedInternalId}");
+                }
+
                 path = "file:///" + Path.GetFullPath(path);
                 loadType = LoadType.Web;
             }
             else
             {
+                if (Logger.IsDebug())
+                {
+                    Logger.LogDebug($"Load from local for the Asset Bundle in {transformedInternalId}");
+                }
+
                 loadType = LoadType.Local;
             }
 
-            bundleFilePath = Path.GetFullPath("Temp/com.unity.addressables/AssetBundle/" + Path.GetFileName(path));
-        }
-
-        private static void AddCallbackInvokeIfDone(AsyncOperation operation, Action<AsyncOperation> callback)
-        {
-            if (operation.isDone)
-            {
-                callback?.Invoke(operation);
-            }
-            else
-            {
-                operation.completed += callback;
-            }
+            bundleFilePath = Path.GetFullPath("Temp/com.unity.addressables/Decrypted/" + Path.GetFileName(path));
         }
 
         private void RequestOperationToGetAssetBundleCompleted(AsyncOperation op)
@@ -168,7 +173,15 @@ namespace Extreal.Integration.Assets.Addressables.ResourceProviders
 #if ENABLE_CACHING
                 if (!string.IsNullOrEmpty(options.Hash) && options.ClearOtherCachedVersionsWhenLoaded)
                 {
+                    if (Logger.IsDebug())
+                    {
+                        Logger.LogDebug($"Cache Clear When New Version Loaded for the Asset Bundle in {transformedInternalId}");
+                    }
                     Caching.ClearOtherCachedVersions(options.BundleName, Hash128.Parse(options.Hash));
+                }
+                else if (Logger.IsDebug())
+                {
+                    Logger.LogDebug($"Cache Clear When Space Is Needed In Cache for the Asset Bundle in {transformedInternalId}");
                 }
 #endif
             }
@@ -179,17 +192,6 @@ namespace Extreal.Integration.Assets.Addressables.ResourceProviders
                     $"Invalid path in AssetBundleProvider: '{transformedInternalId}'.",
                     provideHandle.Location
                 );
-
-#if ENABLE_CACHING
-                if (!string.IsNullOrEmpty(options.Hash))
-                {
-                    var cab = new CachedAssetBundle(options.BundleName, Hash128.Parse(options.Hash));
-                    if (Caching.IsVersionCached(cab))
-                    {
-                        Caching.ClearCachedVersion(cab.name, cab.hash);
-                    }
-                }
-#endif
                 provideHandle.Complete<CryptoAssetBundleResource>(null, false, exception);
             }
         }
@@ -210,12 +212,16 @@ namespace Extreal.Integration.Assets.Addressables.ResourceProviders
 
             if (options.RedirectLimit > 0)
             {
+                if (Logger.IsDebug())
+                {
+                    Logger.LogDebug($"HTTP Redirect Limit is specified: {options.RedirectLimit}");
+                }
+
                 uwr.redirectLimit = options.RedirectLimit;
             }
-            if (provideHandle.ResourceManager.CertificateHandlerInstance != null)
+            else if (Logger.IsDebug())
             {
-                uwr.certificateHandler = provideHandle.ResourceManager.CertificateHandlerInstance;
-                uwr.disposeCertificateHandlerOnDispose = false;
+                Logger.LogDebug($"HTTP Redirect Limit is not specified");
             }
             provideHandle.ResourceManager.WebRequestOverride?.Invoke(uwr);
 
@@ -238,26 +244,41 @@ namespace Extreal.Integration.Assets.Addressables.ResourceProviders
 
         private void GetAssetBundleFromCacheOrFile()
         {
+            if (Logger.IsDebug())
+            {
+                var abilityMessage = options.Crc == 0u ? "disabled" : "enabled";
+                Logger.LogDebug($"The Asset Bundle CRC option is {abilityMessage} for the Asset Bundle in {transformedInternalId}");
+            }
+
             var localBundleFilePath = "file:///" + bundleFilePath;
             UnityWebRequest uwr;
             if (!string.IsNullOrEmpty(options.Hash))
             {
+                if (Logger.IsDebug())
+                {
+                    Logger.LogDebug($"The Asset Bundle Cache option is enabled for the Asset Bundle in {transformedInternalId}");
+                }
+
                 var cachedBundle = new CachedAssetBundle(options.BundleName, Hash128.Parse(options.Hash));
 #if ENABLE_CACHING
                 uwr = options.UseCrcForCachedBundle || !Caching.IsVersionCached(cachedBundle)
                     ? UnityWebRequestAssetBundle.GetAssetBundle(localBundleFilePath, cachedBundle, options.Crc)
                     : UnityWebRequestAssetBundle.GetAssetBundle(localBundleFilePath, cachedBundle);
 #else
-                webRequest = UnityWebRequestAssetBundle.GetAssetBundle(localBundleFilePath, cachedBundle, m_Options.Crc);
+                webRequest = UnityWebRequestAssetBundle.GetAssetBundle(localBundleFilePath, cachedBundle, options.Crc);
 #endif
             }
             else
             {
+                if (Logger.IsDebug())
+                {
+                    Logger.LogDebug($"The Asset Bundle Cache option is disabled for the Asset Bundle in {transformedInternalId}");
+                }
+
                 uwr = UnityWebRequestAssetBundle.GetAssetBundle(localBundleFilePath, options.Crc);
             }
 
-            var uwrAsyncOp = uwr.SendWebRequest();
-            AddCallbackInvokeIfDone(uwrAsyncOp, RequestOperationToGetAssetBundleCompleted);
+            uwr.SendWebRequest().completed += RequestOperationToGetAssetBundleCompleted;
         }
 
         public void Unload()
