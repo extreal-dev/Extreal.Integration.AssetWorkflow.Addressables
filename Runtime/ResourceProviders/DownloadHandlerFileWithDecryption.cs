@@ -1,22 +1,27 @@
+using System;
 using System.Security.Cryptography;
 using System.IO;
 using UnityEngine.Networking;
 using UnityEngine.ResourceManagement.ResourceProviders;
+using Extreal.Core.Logging;
 
 namespace Extreal.Integration.Assets.Addressables.ResourceProviders
 {
     public class DownloadHandlerFileWithDecryption : DownloadHandlerScript
     {
-        private readonly FileStream fileStream;
-        private readonly MemoryStream memoryStream = new MemoryStream();
+        private readonly string path;
         private readonly ICryptoStreamFactory cryptoStreamFactory;
         private readonly AssetBundleRequestOptions options;
 
+        private FileStream fileStream;
+        private MemoryStream memoryStream;
         private CryptoStream decryptor;
         private bool isInit = true;
         private long readPosition;
 
         private const int BufferSize = 4096;
+
+        private static readonly ELogger Logger = LoggingManager.GetLogger(nameof(DownloadHandlerFileWithDecryption));
 
         public DownloadHandlerFileWithDecryption
         (
@@ -31,36 +36,31 @@ namespace Extreal.Integration.Assets.Addressables.ResourceProviders
                 _ = Directory.CreateDirectory(bundleDirectoryPath);
             }
 
-            fileStream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write);
+            this.path = path;
             this.cryptoStreamFactory = cryptoStreamFactory;
             this.options = options;
+
+            memoryStream = new MemoryStream();
         }
 
         protected override bool ReceiveData(byte[] data, int dataLength)
         {
-            UnityEngine.Debug.LogWarning($"Data received: {dataLength}");
-            memoryStream.Seek(0, SeekOrigin.End);
+            _ = memoryStream.Seek(0, SeekOrigin.End);
             memoryStream.Write(data, 0, dataLength);
             if (isInit)
             {
-                if (memoryStream.Length >= 16)
-                {
-                    memoryStream.Seek(0, SeekOrigin.Begin);
-                    decryptor = cryptoStreamFactory.CreateDecryptStream(memoryStream, options);
-                    readPosition = memoryStream.Position;
-                    isInit = false;
-                }
-                else
-                {
-                    UnityEngine.Debug.LogWarning($"Total data length is less than 16: {memoryStream.Length}");
-                }
+                _ = memoryStream.Seek(0, SeekOrigin.Begin);
+                fileStream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write);
+                decryptor = cryptoStreamFactory.CreateDecryptStream(memoryStream, options);
+                readPosition = memoryStream.Position;
+                isInit = false;
             }
 
             var buffer = new byte[BufferSize];
-            memoryStream.Seek(readPosition, SeekOrigin.Begin);
+            _ = memoryStream.Seek(readPosition, SeekOrigin.Begin);
             while (memoryStream.Length - memoryStream.Position >= BufferSize)
             {
-                decryptor.Read(buffer, 0, BufferSize);
+                _ = decryptor.Read(buffer, 0, BufferSize);
                 fileStream.Write(buffer, 0, BufferSize);
             }
             readPosition = memoryStream.Position;
@@ -70,15 +70,30 @@ namespace Extreal.Integration.Assets.Addressables.ResourceProviders
 
         protected override void CompleteContent()
         {
-            UnityEngine.Debug.LogWarning("Finish read");
             if (readPosition != memoryStream.Length)
             {
-                memoryStream.Seek(readPosition, SeekOrigin.Begin);
-                decryptor.CopyTo(fileStream);
+                _ = memoryStream.Seek(readPosition, SeekOrigin.Begin);
+                try
+                {
+                    decryptor.CopyTo(fileStream);
+                }
+                catch (Exception e)
+                {
+                    if (Logger.IsDebug())
+                    {
+                        Logger.LogDebug("Failed to decrypt", e);
+                    }
+                }
             }
+
             fileStream.Dispose();
-            memoryStream.Dispose();
             decryptor.Dispose();
+        }
+
+        public override void Dispose()
+        {
+            memoryStream.Dispose();
+            base.Dispose();
         }
     }
 }

@@ -14,9 +14,6 @@ namespace Extreal.Integration.Assets.Addressables
     using Addressables = UnityEngine.AddressableAssets.Addressables;
 #pragma warning restore IDE0065
 
-    /// <summary>
-    /// Extreal.Integration.Assets.Addressablesモジュールに入るクラス。
-    /// </summary>
     [SuppressMessage("Design", "CC0091")]
     public class AssetProvider : DisposableBase
     {
@@ -37,10 +34,10 @@ namespace Extreal.Integration.Assets.Addressables
         (
             string assetName,
             TimeSpan downloadStatusInterval = default,
-            Func<UniTask> nextFunc = null
+            Func<UniTask> nextFunc = default
         )
         {
-            if (await GetDownloadSizeAsync(assetName) != 0)
+            if (await GetDownloadSizeAsync(assetName) != 0L)
             {
                 await DownloadDependenciesAsync(assetName, downloadStatusInterval);
             }
@@ -61,9 +58,9 @@ namespace Extreal.Integration.Assets.Addressables
 
             var handle = Addressables.DownloadDependenciesAsync(assetName);
 
-            onDownloaded.OnNext(new NamedDownloadStatus(assetName, handle.GetDownloadStatus()));
-            var downloadStatus = default(DownloadStatus);
-            while (handle.Status == AsyncOperationStatus.None) // None: the operation is still in progress.
+            var downloadStatus = handle.GetDownloadStatus();
+            onDownloaded.OnNext(new NamedDownloadStatus(assetName, downloadStatus));
+            while (handle.Status == AsyncOperationStatus.None)
             {
                 var prevDownloadStatus = downloadStatus;
                 downloadStatus = handle.GetDownloadStatus();

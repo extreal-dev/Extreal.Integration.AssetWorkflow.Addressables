@@ -26,7 +26,7 @@ namespace Extreal.Integration.Assets.Addressables.ResourceProviders
 
             if (asset == null)
             {
-                Debug.LogWarningFormat("Releasing null asset bundle from location {0}.  This is an indication that the bundle failed to load.", location);
+                Debug.LogWarning($"Releasing null asset bundle from location {location}.  This is an indication that the bundle failed to load.");
                 return;
             }
 
