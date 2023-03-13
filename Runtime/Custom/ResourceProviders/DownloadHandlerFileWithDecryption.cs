@@ -5,7 +5,7 @@ using UnityEngine.Networking;
 using UnityEngine.ResourceManagement.ResourceProviders;
 using Extreal.Core.Logging;
 
-namespace Extreal.Integration.Assets.Addressables.ResourceProviders
+namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProviders
 {
     public class DownloadHandlerFileWithDecryption : DownloadHandlerScript
     {

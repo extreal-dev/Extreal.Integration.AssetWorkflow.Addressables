@@ -1,4 +1,3 @@
-using System.Data;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -6,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Extreal.Integration.Assets.Addressables.ResourceProviders;
+using Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProviders;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Build;
@@ -29,22 +28,22 @@ using UnityEngine.ResourceManagement.Util;
 using static UnityEditor.AddressableAssets.Build.ContentUpdateScript;
 using Debug = UnityEngine.Debug;
 
-namespace Extreal.Integration.Assets.Addressables.Editor
+namespace Extreal.Integration.AssetWorkflow.Addressables.Editor.Custom
 {
     using Addressables = UnityEngine.AddressableAssets.Addressables;
 
     /// <summary>
     /// Build scripts used for player builds and running with bundles in the editor.
     /// </summary>
-    [CreateAssetMenu(fileName = "BuildScriptTestEncrypt.asset", menuName = "Extreal/Test/Integration.Assets.Addresables.Editor/Test Encrypt Build Script")]
-    public class BuildScriptTestEncryptMode : BuildScriptBase
+    [CreateAssetMenu(fileName = "BuildScriptEncrypt.asset", menuName = "Extreal/Integration.Assets.Addressables.Editor/Encrypt Build Script")]
+    public class BuildScriptEncryptMode : BuildScriptBase
     {
         /// <inheritdoc />
         public override string Name
         {
             get
             {
-                return "Test Encrypt Build Script";
+                return "Encrypt Build Script";
             }
         }
 
@@ -1077,20 +1076,7 @@ namespace Extreal.Integration.Assets.Addressables.Editor
                         BundleSize = GetFileSize(info.FileName),
                         ClearOtherCachedVersionsWhenLoaded = schema.AssetBundledCacheClearBehavior == BundledAssetGroupSchema.CacheClearBehavior.ClearWhenWhenNewVersionLoaded
                     };
-
-                    //========================================================================================
-                    // POSTSCRIPT
-                    // If the group's name is "No Options Crypto Group", dataEntry.Data is not set.
-                    if (assetGroup?.Name != "No Options Crypto Group")
-                    {
-                        dataEntry.Data = requestOptions;
-                    }
-                    else
-                    {
-                        dataEntry.Data = new object();
-                    }
-                    // POSTSCRIPT ENDS HERE
-                    //========================================================================================
+                    dataEntry.Data = requestOptions;
 
                     if (assetGroup == assetGroup.Settings.DefaultGroup && info.Dependencies.Length == 0 && !string.IsNullOrEmpty(info.FileName) && (info.FileName.EndsWith("_unitybuiltinshaders.bundle") || info.FileName.EndsWith("_monoscripts.bundle")))
                     {
@@ -1136,7 +1122,6 @@ namespace Extreal.Integration.Assets.Addressables.Editor
                 var options = dataEntry.Data as AssetBundleRequestOptions;
 
                 if (typeof(CryptoAssetBundleProviderBase).IsAssignableFrom(schema.AssetBundleProviderType.Value)
-                    && options != null
                     && (ResourceManagerConfig.ShouldPathUseWebRequest(loadPath)
                         || options.UseUnityWebRequestForLocalBundles))
                 {

@@ -9,7 +9,7 @@ using UnityEngine.ResourceManagement.Util;
 using AsyncOperation = UnityEngine.AsyncOperation;
 
 
-namespace Extreal.Integration.Assets.Addressables.ResourceProviders
+namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProviders
 {
     public class CryptoAssetBundleResource : IAssetBundleResource
     {
@@ -246,7 +246,10 @@ namespace Extreal.Integration.Assets.Addressables.ResourceProviders
         {
             if (Logger.IsDebug())
             {
-                var abilityMessage = options.Crc == 0u ? "disabled" : "enabled";
+                var abilityMessage = default(string);
+                abilityMessage = options.Crc == 0u
+                    ? "Disabled"
+                    : "Enabled, " + (options.UseCrcForCachedBundle ? "Including" : "Excluding") + " Cached";
                 Logger.LogDebug($"The Asset Bundle CRC option is {abilityMessage} for the Asset Bundle in {transformedInternalId}");
             }
 

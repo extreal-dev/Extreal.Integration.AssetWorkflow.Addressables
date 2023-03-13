@@ -8,7 +8,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceProviders;
 using UnityEngine.SceneManagement;
 
-namespace Extreal.Integration.Assets.Addressables
+namespace Extreal.Integration.AssetWorkflow.Addressables
 {
 #pragma warning disable IDE0065
     using Addressables = UnityEngine.AddressableAssets.Addressables;
@@ -25,6 +25,7 @@ namespace Extreal.Integration.Assets.Addressables
         [SuppressMessage("Usage", "CC0033")]
         private readonly Subject<NamedDownloadStatus> onDownloaded = new Subject<NamedDownloadStatus>();
 
+        [SuppressMessage("Usage", "CC0033")]
         private readonly CompositeDisposable disposables = new CompositeDisposable();
 
         protected override void ReleaseManagedResources()

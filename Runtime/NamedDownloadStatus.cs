@@ -1,6 +1,6 @@
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-namespace Extreal.Integration.Assets.Addressables
+namespace Extreal.Integration.AssetWorkflow.Addressables
 {
     public readonly struct NamedDownloadStatus
     {

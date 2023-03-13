@@ -1,7 +1,7 @@
 {
-  "name": "jp.co.tis.extreal.integration.assets.addressables",
+  "name": "jp.co.tis.extreal.integration.assetworkflow.addressables",
   "version": "1.0.0-next.1",
-  "displayName": "Extreal.Integration.Assets.Addressables",
+  "displayName": "Extreal.Integration.AssetWorkflow.Addressables",
   "unity": "2021.3",
   "author": {
     "name": "TIS Inc."

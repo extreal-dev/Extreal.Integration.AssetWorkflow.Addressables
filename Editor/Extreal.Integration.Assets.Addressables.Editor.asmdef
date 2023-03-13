@@ -1,10 +1,10 @@
 {
-    "name": "Extreal.Integration.Assets.Addressables.Editor",
-    "rootNamespace": "Extreal.Integration.Assets.Addressables.Editor",
+    "name": "Extreal.Integration.AssetWorkflow.Addressables.Editor",
+    "rootNamespace": "Extreal.Integration.AssetWorkflow.Addressables.Editor",
     "references": [
         "Extreal.Core.Logging",
         "Extreal.Core.Common",
-        "Extreal.Integration.Assets.Addressables",
+        "Extreal.Integration.AssetWorkflow.Addressables",
         "Unity.Addressables",
         "Unity.Addressables.Editor",
         "Unity.ResourceManager",

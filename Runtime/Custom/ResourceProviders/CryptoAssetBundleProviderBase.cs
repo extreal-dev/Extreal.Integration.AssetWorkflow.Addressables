@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.ResourceManagement.ResourceLocations;
 using UnityEngine.ResourceManagement.ResourceProviders;
 
-namespace Extreal.Integration.Assets.Addressables.ResourceProviders
+namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProviders
 {
     public abstract class CryptoAssetBundleProviderBase : ResourceProviderBase
     {

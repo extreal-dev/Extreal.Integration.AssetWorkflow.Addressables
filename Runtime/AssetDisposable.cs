@@ -4,15 +4,12 @@ using Extreal.Core.Logging;
 using UnityEngine;
 using UnityEngine.ResourceManagement.ResourceProviders;
 
-namespace Extreal.Integration.Assets.Addressables
+namespace Extreal.Integration.AssetWorkflow.Addressables
 {
 #pragma warning disable IDE0065
     using Addressables = UnityEngine.AddressableAssets.Addressables;
 #pragma warning restore IDE0065
 
-    /// <summary>
-    /// Extreal.Integration.Assets.Addressablesモジュールに入るクラス。
-    /// </summary>
     public class AssetDisposable<TResult> : DisposableBase
     {
         private static readonly ELogger Logger = LoggingManager.GetLogger(nameof(AssetDisposable<TResult>));

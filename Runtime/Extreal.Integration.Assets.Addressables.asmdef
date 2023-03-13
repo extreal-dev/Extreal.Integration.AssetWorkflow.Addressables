@@ -1,6 +1,6 @@
 {
-    "name": "Extreal.Integration.Assets.Addressables",
-    "rootNamespace": "Extreal.Integration.Assets.Addressables",
+    "name": "Extreal.Integration.AssetWorkflow.Addressables",
+    "rootNamespace": "Extreal.Integration.AssetWorkflow.Addressables",
     "references": [
         "Extreal.Core.Logging",
         "Extreal.Core.Common",

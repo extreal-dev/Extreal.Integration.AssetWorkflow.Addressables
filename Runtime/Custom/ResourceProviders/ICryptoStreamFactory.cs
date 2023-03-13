@@ -2,7 +2,7 @@ using System.IO;
 using System.Security.Cryptography;
 using UnityEngine.ResourceManagement.ResourceProviders;
 
-namespace Extreal.Integration.Assets.Addressables.ResourceProviders
+namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProviders
 {
     public interface ICryptoStreamFactory
     {
