@@ -12,7 +12,7 @@ using AsyncOperation = UnityEngine.AsyncOperation;
 namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProviders
 {
     /// <summary>
-    /// Class that holds encrypted asset bundle.
+    /// Class that handles encrypted asset bundle.
     /// </summary>
     public class CryptoAssetBundleResource : IAssetBundleResource
     {
@@ -296,7 +296,7 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
         }
 
         /// <summary>
-        /// Unloads an asset bundle.
+        /// Unloads the asset bundle this instance holds.
         /// </summary>
         public void Unload()
         {

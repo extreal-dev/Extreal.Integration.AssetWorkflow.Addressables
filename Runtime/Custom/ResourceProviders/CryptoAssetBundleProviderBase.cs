@@ -11,7 +11,7 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
     public abstract class CryptoAssetBundleProviderBase : ResourceProviderBase
     {
         /// <summary>
-        /// Factory that generates CryptoStream.
+        /// Factory that creates CryptoStream.
         /// </summary>
         public abstract ICryptoStreamFactory CryptoStreamFactory { get; }
 

@@ -10,16 +10,25 @@ namespace Extreal.Integration.AssetWorkflow.Addressables
     using Addressables = UnityEngine.AddressableAssets.Addressables;
 #pragma warning restore IDE0065
 
+    /// <summary>
+    /// Class that enables to dispose the asset loaded by Addressables.
+    /// </summary>
+    /// <typeparam name="TResult">Type of the asset.</typeparam>
     public class AssetDisposable<TResult> : DisposableBase
     {
         private static readonly ELogger Logger = LoggingManager.GetLogger(nameof(AssetDisposable<TResult>));
 
+        /// <summary>
+        /// Downloaded asset.
+        /// </summary>
+        /// <value>Downloaded asset.</value>
         public TResult Result { get; }
 
         [SuppressMessage("CodeCracker", "CC0057")]
         internal AssetDisposable(TResult result)
             => Result = result;
 
+        /// <inheritdoc/>
         protected override void ReleaseManagedResources()
         {
             if (Result is SceneInstance result)

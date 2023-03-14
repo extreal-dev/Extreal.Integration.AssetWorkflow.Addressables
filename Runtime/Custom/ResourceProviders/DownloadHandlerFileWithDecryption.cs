@@ -29,7 +29,7 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
         /// <summary>
         /// Creates a DownloadHandlerFileWithDecryption.
         /// </summary>
-        /// <param name="path">File path to download.</param>
+        /// <param name="path">Path to file to be written.</param>
         /// <param name="cryptoStreamFactory">Factory that creates CryptoStream.</param>
         /// <param name="options">Contains cache information to be used by the AssetBundleProvider.</param>
         public DownloadHandlerFileWithDecryption

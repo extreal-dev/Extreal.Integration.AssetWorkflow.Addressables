@@ -15,13 +15,24 @@ namespace Extreal.Integration.AssetWorkflow.Addressables
     using Addressables = UnityEngine.AddressableAssets.Addressables;
 #pragma warning restore IDE0065
 
+    /// <summary>
+    /// Class that makes Addressables more useful.
+    /// </summary>
     [SuppressMessage("Design", "CC0091")]
     public class AssetProvider : DisposableBase
     {
+        /// <summary>
+        /// <para>Invokes just before downloading the asset bundles.</para>
+        /// Arg: Asset name
+        /// </summary>
         public IObservable<string> OnDownloading => onDownloading.AddTo(disposables);
         [SuppressMessage("Usage", "CC0033")]
         private readonly Subject<string> onDownloading = new Subject<string>();
 
+        /// <summary>
+        /// <para>Invokes continuously while the asset bundle's data is downloaded.</para>
+        /// Arg: Download status with asset name
+        /// </summary>
         public IObservable<AssetDownloadStatus> OnDownloaded => onDownloaded.AddTo(disposables);
         [SuppressMessage("Usage", "CC0033")]
         private readonly Subject<AssetDownloadStatus> onDownloaded = new Subject<AssetDownloadStatus>();
@@ -47,13 +58,28 @@ namespace Extreal.Integration.AssetWorkflow.Addressables
 
         private readonly IRetryStrategy retryStrategy;
 
+        /// <summary>
+        /// Creates AssetProvider.
+        /// </summary>
+        /// <param name="retryStrategy">Retry strategy to be used for downloading.</param>
         [SuppressMessage("Usage", "CC0057")]
         public AssetProvider(IRetryStrategy retryStrategy = null)
             => this.retryStrategy = retryStrategy ?? NoRetryStrategy.Instance;
 
+        /// <inheritdoc/>
         protected override void ReleaseManagedResources()
             => disposables.Dispose();
 
+        /// <summary>
+        /// Downloads the asset bundle.
+        /// </summary>
+        /// <param name="assetName">Arbitrary asset name included in the downloaded asset bundle.</param>
+        /// <param name="downloadStatusInterval">
+        ///     <para>Interval to get download status.</para>
+        ///     Default: Every frame
+        /// </param>
+        /// <param name="nextFunc">Function called after finishing to download.</param>
+        /// <returns>UniTask of this method.</returns>
         public async UniTask DownloadAsync
         (
             string assetName,
@@ -79,6 +105,11 @@ namespace Extreal.Integration.AssetWorkflow.Addressables
             return result;
         }
 
+        /// <summary>
+        /// Gets the download size.
+        /// </summary>
+        /// <param name="assetName">Arbitrary asset name included in the downloaded asset bundle.</param>
+        /// <returns>Download size.</returns>
         public async UniTask<long> GetDownloadSizeAsync(string assetName)
         {
             var handle = Addressables.GetDownloadSizeAsync(assetName);
@@ -117,6 +148,12 @@ namespace Extreal.Integration.AssetWorkflow.Addressables
             ReleaseHandle(handle);
         }
 
+        /// <summary>
+        /// Loads the asset.
+        /// </summary>
+        /// <param name="assetName">Asset name to be downloaded.</param>
+        /// <typeparam name="T">Type of the downloaded asset.</typeparam>
+        /// <returns>Downloaded disposable asset.</returns>
         public async UniTask<AssetDisposable<T>> LoadAssetAsync<T>(string assetName)
         {
             Func<UniTask<AssetDisposable<T>>> func = async () =>
@@ -133,9 +170,20 @@ namespace Extreal.Integration.AssetWorkflow.Addressables
             return await HandleWithSubscribeAsync(handler);
         }
 
+        /// <summary>
+        /// Loads the asset that name is equal to type name.
+        /// </summary>
+        /// <typeparam name="T">Type of the downloaded asset.</typeparam>
+        /// <returns>Downloaded disposable asset.</returns>
         public UniTask<AssetDisposable<T>> LoadAssetAsync<T>()
             => LoadAssetAsync<T>(typeof(T).Name);
 
+        /// <summary>
+        /// Loads the scene.
+        /// </summary>
+        /// <param name="assetName">Scene name to be loaded.</param>
+        /// <param name="loadMode">If LoadSceneMode.Single then all current Scenes will be unloaded before loading.</param>
+        /// <returns>Disposable scene instance of downloaded scene.</returns>
         public async UniTask<AssetDisposable<SceneInstance>> LoadSceneAsync
         (
             string assetName,

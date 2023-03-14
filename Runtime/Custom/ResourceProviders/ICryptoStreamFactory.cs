@@ -4,9 +4,8 @@ using UnityEngine.ResourceManagement.ResourceProviders;
 
 namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProviders
 {
-
     /// <summary>
-    /// Factory class to creates CryptoStream.
+    /// Interface for the factory class to creates CryptoStream.
     /// </summary>
     public interface ICryptoStreamFactory
     {
@@ -15,7 +14,7 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
         /// </summary>
         /// <param name="baseStream">Base stream.</param>
         /// <param name="options">Contains cache information to be used by the AssetBundleProvider.</param>
-        /// <returns>CryptoStream</returns>
+        /// <returns>CryptoStream.</returns>
         CryptoStream CreateEncryptStream(Stream baseStream, AssetBundleRequestOptions options);
 
         /// <summary>
@@ -23,7 +22,7 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
         /// </summary>
         /// <param name="baseStream">Base stream.</param>
         /// <param name="options">Contains cache information to be used by the AssetBundleProvider.</param>
-        /// <returns>CryptoStream</returns>
+        /// <returns>CryptoStream.</returns>
         CryptoStream CreateDecryptStream(Stream baseStream, AssetBundleRequestOptions options);
     }
 }
