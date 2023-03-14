@@ -35,7 +35,7 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Editor.Custom
     /// <summary>
     /// Build scripts used for player builds and running with bundles in the editor.
     /// </summary>
-    [CreateAssetMenu(fileName = "BuildScriptEncrypt.asset", menuName = "Extreal/Integration.Assets.Addressables.Editor/Encrypt Build Script")]
+    [CreateAssetMenu(fileName = "BuildScriptEncrypt.asset", menuName = "Extreal/Integration.AssetWorkflow.Addressables.Editor/Encrypt Build Script")]
     public class BuildScriptEncryptMode : BuildScriptBase
     {
         /// <inheritdoc />
