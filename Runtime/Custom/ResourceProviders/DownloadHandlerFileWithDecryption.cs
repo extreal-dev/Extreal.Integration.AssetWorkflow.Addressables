@@ -7,6 +7,9 @@ using Extreal.Core.Logging;
 
 namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProviders
 {
+    /// <summary>
+    /// Class for downloading and decrypting encrypted files.
+    /// </summary>
     public class DownloadHandlerFileWithDecryption : DownloadHandlerScript
     {
         private readonly string path;
@@ -23,6 +26,12 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
 
         private static readonly ELogger Logger = LoggingManager.GetLogger(nameof(DownloadHandlerFileWithDecryption));
 
+        /// <summary>
+        /// Creates a DownloadHandlerFileWithDecryption.
+        /// </summary>
+        /// <param name="path">File path to download.</param>
+        /// <param name="cryptoStreamFactory">Factory that creates CryptoStream.</param>
+        /// <param name="options">Contains cache information to be used by the AssetBundleProvider.</param>
         public DownloadHandlerFileWithDecryption
         (
             string path,
@@ -43,6 +52,7 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
             memoryStream = new MemoryStream();
         }
 
+        /// <inheritdoc/>
         protected override bool ReceiveData(byte[] data, int dataLength)
         {
             _ = memoryStream.Seek(0, SeekOrigin.End);
@@ -68,6 +78,7 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
             return true;
         }
 
+        /// <inheritdoc/>
         protected override void CompleteContent()
         {
             if (readPosition != memoryStream.Length)
@@ -90,6 +101,7 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
             decryptor.Dispose();
         }
 
+        /// <inheritdoc/>
         public override void Dispose()
         {
             memoryStream.Dispose();

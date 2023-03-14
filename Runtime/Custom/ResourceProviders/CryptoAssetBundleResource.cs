@@ -11,6 +11,9 @@ using AsyncOperation = UnityEngine.AsyncOperation;
 
 namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProviders
 {
+    /// <summary>
+    /// Class that holds encrypted asset bundle.
+    /// </summary>
     public class CryptoAssetBundleResource : IAssetBundleResource
     {
         private enum LoadType
@@ -44,6 +47,11 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
 
         private static readonly ELogger Logger = LoggingManager.GetLogger(nameof(CryptoAssetBundleResource));
 
+        /// <summary>
+        /// Creates a CryptoAssetBundleResource.
+        /// </summary>
+        /// <param name="provideHandle">Container for all data need by providers to fulfill requests.</param>
+        /// <param name="cryptoStreamFactory">Factory that creates CryptoStream.</param>
         public CryptoAssetBundleResource(ProvideHandle provideHandle, ICryptoStreamFactory cryptoStreamFactory)
         {
             this.provideHandle = provideHandle;
@@ -77,6 +85,9 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
             return status;
         }
 
+        /// <summary>
+        /// Fetches and decrypts encrypted asset bundles.
+        /// </summary>
         public void Fetch()
         {
             GetLoadInfo(provideHandle, out var loadType, out transformedInternalId);
@@ -284,6 +295,9 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
             uwr.SendWebRequest().completed += RequestOperationToGetAssetBundleCompleted;
         }
 
+        /// <summary>
+        /// Unloads an asset bundle.
+        /// </summary>
         public void Unload()
         {
             if (assetBundle != null)
@@ -293,6 +307,7 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
             }
         }
 
+        /// <inheritdoc/>
         public AssetBundle GetAssetBundle()
             => assetBundle;
 

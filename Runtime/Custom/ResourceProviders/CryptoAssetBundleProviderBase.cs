@@ -5,18 +5,27 @@ using UnityEngine.ResourceManagement.ResourceProviders;
 
 namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProviders
 {
+    /// <summary>
+    /// Class that provides encrypted asset bundles.
+    /// </summary>
     public abstract class CryptoAssetBundleProviderBase : ResourceProviderBase
     {
+        /// <summary>
+        /// Factory that generates CryptoStream.
+        /// </summary>
         public abstract ICryptoStreamFactory CryptoStreamFactory { get; }
 
+        /// <inheritdoc/>
         public override void Provide(ProvideHandle providerInterface)
         {
             var res = new CryptoAssetBundleResource(providerInterface, CryptoStreamFactory);
             res.Fetch();
         }
 
+        /// <inheritdoc/>
         public override Type GetDefaultType(IResourceLocation location) => typeof(IAssetBundleResource);
 
+        /// <inheritdoc/>
         public override void Release(IResourceLocation location, object asset)
         {
             if (location == null)
