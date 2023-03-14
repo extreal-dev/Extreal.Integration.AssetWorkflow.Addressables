@@ -22,9 +22,9 @@ namespace Extreal.Integration.AssetWorkflow.Addressables
         [SuppressMessage("Usage", "CC0033")]
         private readonly Subject<string> onDownloading = new Subject<string>();
 
-        public IObservable<NamedDownloadStatus> OnDownloaded => onDownloaded.AddTo(disposables);
+        public IObservable<AssetDownloadStatus> OnDownloaded => onDownloaded.AddTo(disposables);
         [SuppressMessage("Usage", "CC0033")]
-        private readonly Subject<NamedDownloadStatus> onDownloaded = new Subject<NamedDownloadStatus>();
+        private readonly Subject<AssetDownloadStatus> onDownloaded = new Subject<AssetDownloadStatus>();
 
         /// <summary>
         /// <para>Invokes just before retrying to connect to the server.</para>
@@ -94,14 +94,14 @@ namespace Extreal.Integration.AssetWorkflow.Addressables
             var handle = Addressables.DownloadDependenciesAsync(assetName);
 
             var downloadStatus = handle.GetDownloadStatus();
-            onDownloaded.OnNext(new NamedDownloadStatus(assetName, downloadStatus));
+            onDownloaded.OnNext(new AssetDownloadStatus(assetName, downloadStatus));
             while (handle.Status == AsyncOperationStatus.None)
             {
                 var prevDownloadStatus = downloadStatus;
                 downloadStatus = handle.GetDownloadStatus();
                 if (prevDownloadStatus.DownloadedBytes != downloadStatus.DownloadedBytes)
                 {
-                    onDownloaded.OnNext(new NamedDownloadStatus(assetName, downloadStatus));
+                    onDownloaded.OnNext(new AssetDownloadStatus(assetName, downloadStatus));
                 }
                 if (interval == default)
                 {
@@ -112,7 +112,7 @@ namespace Extreal.Integration.AssetWorkflow.Addressables
                     await UniTask.Delay(interval);
                 }
             }
-            onDownloaded.OnNext(new NamedDownloadStatus(assetName, handle.GetDownloadStatus()));
+            onDownloaded.OnNext(new AssetDownloadStatus(assetName, handle.GetDownloadStatus()));
 
             ReleaseHandle(handle);
         }
