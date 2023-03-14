@@ -1,10 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProviders;
+using UnityEditor;
+using UnityEditor.AddressableAssets;
+using UnityEditor.AddressableAssets.Build;
 using UnityEditor.AddressableAssets.Build.BuildPipelineTasks;
+using UnityEditor.AddressableAssets.Build.DataBuilders;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEditor.Build.Pipeline;
@@ -21,22 +27,23 @@ using UnityEngine.ResourceManagement.ResourceProviders;
 using UnityEngine.ResourceManagement.Util;
 using static UnityEditor.AddressableAssets.Build.ContentUpdateScript;
 
-namespace UnityEditor.AddressableAssets.Build.DataBuilders
+namespace Extreal.Integration.AssetWorkflow.Addressables.Editor.Custom
 {
     using Debug = UnityEngine.Debug;
+    using Addressables = UnityEngine.AddressableAssets.Addressables;
 
     /// <summary>
     /// Build scripts used for player builds and running with bundles in the editor.
     /// </summary>
-    [CreateAssetMenu(fileName = "BuildScriptPacked.asset", menuName = "Addressables/Content Builders/Default Build Script")]
-    public class BuildScriptPackedMode : BuildScriptBase
+    [CreateAssetMenu(fileName = "BuildScriptEncrypt.asset", menuName = "Extreal/Integration.AssetWorkflow.Addressables.Editor/Encrypt Build Script")]
+    public class BuildScriptEncryptMode : BuildScriptBase
     {
         /// <inheritdoc />
         public override string Name
         {
             get
             {
-                return "Default Build Script";
+                return "Encrypt Build Script";
             }
         }
 
@@ -65,7 +72,7 @@ namespace UnityEditor.AddressableAssets.Build.DataBuilders
             timer.Start();
             InitializeBuildContext(builderInput, out AddressableAssetsBuildContext aaContext);
 
-            using (m_Log.ScopedStep(LogLevel.Info, "ProcessAllGroups"))
+            using (Log.ScopedStep(LogLevel.Info, "ProcessAllGroups"))
             {
                 var errorString = ProcessAllGroups(aaContext);
                 if (!string.IsNullOrEmpty(errorString))
@@ -99,7 +106,7 @@ namespace UnityEditor.AddressableAssets.Build.DataBuilders
                 DisableCatalogUpdateOnStartup = aaSettings.DisableCatalogUpdateOnStartup,
                 IsLocalCatalogInBundle = aaSettings.BundleLocalCatalog,
 #if UNITY_2019_3_OR_NEWER
-                AddressablesVersion = PackageManager.PackageInfo.FindForAssembly(typeof(Addressables).Assembly)?.version,
+                AddressablesVersion = UnityEditor.PackageManager.PackageInfo.FindForAssembly(typeof(Addressables).Assembly)?.version,
 #endif
                 MaxConcurrentWebRequests = aaSettings.MaxConcurrentWebRequests,
                 CatalogRequestsTimeout = aaSettings.CatalogRequestsTimeout
@@ -240,10 +247,10 @@ namespace UnityEditor.AddressableAssets.Build.DataBuilders
                 buildTasks.Add(extractData);
 
                 IBundleBuildResults results;
-                using (m_Log.ScopedStep(LogLevel.Info, "ContentPipeline.BuildAssetBundles"))
+                using (Log.ScopedStep(LogLevel.Info, "ContentPipeline.BuildAssetBundles"))
                 using (new SBPSettingsOverwriterScope(ProjectConfigData.GenerateBuildLayout)) // build layout generation requires full SBP write results
                 {
-                    var exitCode = ContentPipeline.BuildAssetBundles(buildParams, new BundleBuildContent(m_AllBundleInputDefs), out results, buildTasks, aaContext, m_Log);
+                    var exitCode = ContentPipeline.BuildAssetBundles(buildParams, new BundleBuildContent(m_AllBundleInputDefs), out results, buildTasks, aaContext, Log);
 
                     if (exitCode < ReturnCode.Success)
                         return AddressableAssetBuildResult.CreateResult<TResult>(null, 0, "SBP Error" + exitCode);
@@ -253,7 +260,7 @@ namespace UnityEditor.AddressableAssets.Build.DataBuilders
 
                 var bundleRenameMap = new Dictionary<string, string>();
                 var postCatalogUpdateCallbacks = new List<Action>();
-                using (m_Log.ScopedStep(LogLevel.Info, "PostProcessBundles"))
+                using (Log.ScopedStep(LogLevel.Info, "PostProcessBundles"))
                 using (var progressTracker = new UnityEditor.Build.Pipeline.Utilities.ProgressTracker())
                 {
                     progressTracker.UpdateTask("Post Processing AssetBundles");
@@ -267,7 +274,7 @@ namespace UnityEditor.AddressableAssets.Build.DataBuilders
                     {
                         if (aaContext.assetGroupToBundles.TryGetValue(assetGroup, out List<string> buildBundles))
                         {
-                            using (m_Log.ScopedStep(LogLevel.Info, assetGroup.name))
+                            using (Log.ScopedStep(LogLevel.Info, assetGroup.name))
                             {
                                 List<string> outputBundles = new List<string>();
                                 for (int i = 0; i < buildBundles.Count; ++i)
@@ -285,7 +292,7 @@ namespace UnityEditor.AddressableAssets.Build.DataBuilders
                     }
                 }
 
-                using (m_Log.ScopedStep(LogLevel.Info, "Process Catalog Entries"))
+                using (Log.ScopedStep(LogLevel.Info, "Process Catalog Entries"))
                 {
                     ProcessCatalogEntriesForBuild(aaContext, groups, builderInput, extractData.WriteData,
                         carryOverCachedState, m_BundleToInternalId);
@@ -299,13 +306,13 @@ namespace UnityEditor.AddressableAssets.Build.DataBuilders
 #if UNITY_2021_1_OR_NEWER
                         m_Linker.AddSerializedClass(resultValue.includedSerializeReferenceFQN);
 #else
-                    if (resultValue.GetType().GetProperty("includedSerializeReferenceFQN") != null)
-                        m_Linker.AddSerializedClass(resultValue.GetType().GetProperty("includedSerializeReferenceFQN").GetValue(resultValue) as System.Collections.Generic.IEnumerable<string>);
+                        if (resultValue.GetType().GetProperty("includedSerializeReferenceFQN") != null)
+                            m_Linker.AddSerializedClass(resultValue.GetType().GetProperty("includedSerializeReferenceFQN").GetValue(resultValue) as System.Collections.Generic.IEnumerable<string>);
 #endif
                     }
                 }
 
-                using (m_Log.ScopedStep(LogLevel.Info, "Generate Build Layout"))
+                using (Log.ScopedStep(LogLevel.Info, "Generate Build Layout"))
                 {
                     if (ProjectConfigData.GenerateBuildLayout)
                     {
@@ -314,16 +321,16 @@ namespace UnityEditor.AddressableAssets.Build.DataBuilders
                             progressTracker.UpdateTask("Generating Build Layout");
                             List<IBuildTask> tasks = new List<IBuildTask>();
                             var buildLayoutTask = new BuildLayoutGenerationTask();
-                            buildLayoutTask.m_BundleNameRemap = bundleRenameMap;
+                            buildLayoutTask.BundleNameRemap = bundleRenameMap;
                             tasks.Add(buildLayoutTask);
-                            BuildTasksRunner.Run(tasks, extractData.m_BuildContext);
+                            BuildTasksRunner.Run(tasks, extractData.BuildContext);
                         }
                     }
                 }
             }
 
             ContentCatalogData contentCatalog;
-            using (m_Log.ScopedStep(LogLevel.Info, "Generate Catalog"))
+            using (Log.ScopedStep(LogLevel.Info, "Generate Catalog"))
             {
                 contentCatalog = new ContentCatalogData(ResourceManagerRuntimeData.kCatalogAddress);
                 contentCatalog.SetData(aaContext.locations.OrderBy(f => f.InternalId).ToList(), aaContext.Settings.OptimizeCatalogSize);
@@ -340,7 +347,7 @@ namespace UnityEditor.AddressableAssets.Build.DataBuilders
                 CreateCatalogFiles(jsonText, builderInput, aaContext);
             }
 
-            using (m_Log.ScopedStep(LogLevel.Info, "Generate link"))
+            using (Log.ScopedStep(LogLevel.Info, "Generate link"))
             {
                 foreach (var pd in contentCatalog.ResourceProviderData)
                 {
@@ -372,20 +379,20 @@ namespace UnityEditor.AddressableAssets.Build.DataBuilders
 
             var settingsPath = Addressables.BuildPath + "/" + builderInput.RuntimeSettingsFilename;
 
-            using (m_Log.ScopedStep(LogLevel.Info, "Generate Settings"))
+            using (Log.ScopedStep(LogLevel.Info, "Generate Settings"))
                 WriteFile(settingsPath, JsonUtility.ToJson(aaContext.runtimeData), builderInput.Registry);
 
             if (extractData.BuildCache != null && builderInput.PreviousContentState == null)
             {
-                using (m_Log.ScopedStep(LogLevel.Info, "Generate Content Update State"))
+                using (Log.ScopedStep(LogLevel.Info, "Generate Content Update State"))
                 {
                     var remoteCatalogLoadPath = aaContext.Settings.BuildRemoteCatalog
                         ? aaContext.Settings.RemoteCatalogLoadPath.GetValue(aaContext.Settings)
                         : string.Empty;
 
                     var allEntries = new List<AddressableAssetEntry>();
-                    using (m_Log.ScopedStep(LogLevel.Info, "Get Assets"))
-                        aaContext.Settings.GetAllAssets(allEntries, false, ContentUpdateScript.GroupFilter);
+                    using (Log.ScopedStep(LogLevel.Info, "Get Assets"))
+                        aaContext.Settings.GetAllAssets(allEntries, false, ContentUpdateScript.GroupFilterFunc);
 
                     if (ContentUpdateScript.SaveContentState(aaContext.locations, tempPath, allEntries,
                             extractData.DependencyData, playerBuildVersion, remoteCatalogLoadPath,
@@ -396,14 +403,6 @@ namespace UnityEditor.AddressableAssets.Build.DataBuilders
                         {
                             File.Copy(tempPath, contentStatePath, true);
                             builderInput.Registry.AddFile(contentStatePath);
-                        }
-                        catch (UnauthorizedAccessException uae)
-                        {
-                            if (!AddressableAssetUtility.IsVCAssetOpenForEdit(contentStatePath))
-                                Debug.LogErrorFormat("Cannot access the file {0}. It may be locked by version control.",
-                                    contentStatePath);
-                            else
-                                Debug.LogException(uae);
                         }
                         catch (Exception e)
                         {
@@ -561,7 +560,7 @@ namespace UnityEditor.AddressableAssets.Build.DataBuilders
             var buildParams = new BundleBuildParameters(builderInput.Target, builderInput.TargetGroup, Path.GetDirectoryName(filepath));
             if (builderInput.Target == BuildTarget.WebGL)
                 buildParams.BundleCompression = BuildCompression.LZ4Runtime;
-            var retCode = ContentPipeline.BuildAssetBundles(buildParams, bundleBuildContent, out IBundleBuildResults result, buildTasks, m_Log);
+            var retCode = ContentPipeline.BuildAssetBundles(buildParams, bundleBuildContent, out IBundleBuildResults result, buildTasks, Log);
 
             if (Directory.Exists(tempFolderPath))
             {
@@ -1115,7 +1114,26 @@ namespace UnityEditor.AddressableAssets.Build.DataBuilders
                     outputBundles[i] = StripHashFromBundleLocation(outputBundles[i]);
 
                 bundleRenameMap.Add(buildBundles[i], outputBundles[i]);
-                MoveFileToDestinationWithTimestampIfDifferent(srcPath, targetPath, m_Log);
+                //========================================================================================
+                // POSTSCRIPT
+                // If the group's schema has a custom Provider that reads while decrypting, encrypt it.
+                // Otherwise, use the original processing.
+                var loadPath = schema.LoadPath.GetValue(assetGroup.Settings);
+                var options = dataEntry.Data as AssetBundleRequestOptions;
+
+                if (typeof(CryptoAssetBundleProviderBase).IsAssignableFrom(schema.AssetBundleProviderType.Value)
+                    && (ResourceManagerConfig.ShouldPathUseWebRequest(loadPath)
+                        || options.UseUnityWebRequestForLocalBundles))
+                {
+                    Encrypt(srcPath, targetPath, schema, options);
+                }
+                else
+                {
+                    MoveFileToDestinationWithTimestampIfDifferent(srcPath, targetPath, Log);
+                }
+                // POSTSCRIPT ENDS HERE
+                //========================================================================================
+
                 AddPostCatalogUpdatesInternal(assetGroup, postCatalogUpdateCallbacks, dataEntry, targetPath, registry);
 
                 registry.AddFile(targetPath);
@@ -1246,5 +1264,39 @@ namespace UnityEditor.AddressableAssets.Build.DataBuilders
                 File.Exists(m_CatalogBuildPath) &&
                 File.Exists(settingsPath);
         }
+
+        //========================================================================================
+        // POSTSCRIPT
+        // Encrypts the file in srcPath and writes to the file in destPath.
+        [SuppressMessage("CodeCracker", "CC0022")]
+        private static void Encrypt
+        (
+            string srcPath,
+            string destPath,
+            BundledAssetGroupSchema schema,
+            AssetBundleRequestOptions options
+        )
+        {
+            var dirName = Path.GetDirectoryName(destPath);
+            if (!Directory.Exists(dirName))
+            {
+                _ = Directory.CreateDirectory(dirName);
+            }
+
+            {
+                using var srcStream = new FileStream(srcPath, FileMode.Open, FileAccess.Read);
+                using var destStream = new FileStream(destPath, FileMode.OpenOrCreate, FileAccess.Write);
+                var provider = schema.AssetBundleProviderType.Value
+                                .GetConstructor(Array.Empty<Type>())
+                                .Invoke(default) as CryptoAssetBundleProviderBase;
+                using var encryptor = provider.CryptoStreamFactory.CreateEncryptStream(destStream, options);
+                srcStream.CopyTo(encryptor);
+            }
+
+            options.BundleSize = GetFileSize(destPath);
+            File.Delete(srcPath);
+        }
+        // POSTSCRIPT ENDS HERE
+        //========================================================================================
     }
 }
