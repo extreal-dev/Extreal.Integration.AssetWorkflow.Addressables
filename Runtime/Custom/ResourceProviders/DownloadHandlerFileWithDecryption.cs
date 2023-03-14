@@ -14,7 +14,7 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
         private readonly AssetBundleRequestOptions options;
 
         private FileStream fileStream;
-        private MemoryStream memoryStream;
+        private readonly MemoryStream memoryStream;
         private CryptoStream decryptor;
         private bool isInit = true;
         private long readPosition;
@@ -31,7 +31,7 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
         )
         {
             var bundleDirectoryPath = Path.GetDirectoryName(path);
-            if (!Directory.Exists(bundleDirectoryPath))
+            if (!Directory.Exists(bundleDirectoryPath) && bundleDirectoryPath != null)
             {
                 _ = Directory.CreateDirectory(bundleDirectoryPath);
             }

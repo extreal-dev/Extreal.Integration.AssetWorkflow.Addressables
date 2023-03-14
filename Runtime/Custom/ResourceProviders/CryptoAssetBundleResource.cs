@@ -226,7 +226,7 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
             provideHandle.ResourceManager.WebRequestOverride?.Invoke(uwr);
 
             uwrAsyncOperation = uwr.SendWebRequest();
-            uwrAsyncOperation.completed += op =>
+            uwrAsyncOperation.completed += _ =>
             {
                 if (uwr.result != UnityWebRequest.Result.Success)
                 {

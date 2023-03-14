@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.ExceptionServices;
 using Cysharp.Threading.Tasks;
+using Extreal.Core.Common.Retry;
 using Extreal.Core.Common.System;
 using UniRx;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -25,8 +26,30 @@ namespace Extreal.Integration.AssetWorkflow.Addressables
         [SuppressMessage("Usage", "CC0033")]
         private readonly Subject<NamedDownloadStatus> onDownloaded = new Subject<NamedDownloadStatus>();
 
+        /// <summary>
+        /// <para>Invokes just before retrying to connect to the server.</para>
+        /// Arg: Retry count
+        /// </summary>
+        public IObservable<int> OnConnectRetrying => onConnectRetrying.AddTo(disposables);
+        [SuppressMessage("Usage", "CC0033")]
+        private readonly Subject<int> onConnectRetrying = new Subject<int>();
+
+        /// <summary>
+        /// <para>Invokes immediately after finishing retrying to connect to the server.</para>
+        /// Arg: Final result of retry. True for success, false for failure.
+        /// </summary>
+        public IObservable<bool> OnConnectRetried => onConnectRetried.AddTo(disposables);
+        [SuppressMessage("Usage", "CC0033")]
+        private readonly Subject<bool> onConnectRetried = new Subject<bool>();
+
         [SuppressMessage("Usage", "CC0033")]
         private readonly CompositeDisposable disposables = new CompositeDisposable();
+
+        private readonly IRetryStrategy retryStrategy;
+
+        [SuppressMessage("Usage", "CC0057")]
+        public AssetProvider(IRetryStrategy retryStrategy = null)
+            => this.retryStrategy = retryStrategy ?? NoRetryStrategy.Instance;
 
         protected override void ReleaseManagedResources()
             => disposables.Dispose();
@@ -40,9 +63,20 @@ namespace Extreal.Integration.AssetWorkflow.Addressables
         {
             if (await GetDownloadSizeAsync(assetName) != 0L)
             {
-                await DownloadDependenciesAsync(assetName, downloadStatusInterval);
+                Func<UniTask> func = ()
+                    => DownloadDependenciesAsync(assetName, downloadStatusInterval);
+                using var handler = RetryHandler<UniTask>.Of(func, _ => true, retryStrategy);
+                await HandleWithSubscribeAsync(handler);
             }
             nextFunc?.Invoke().Forget();
+        }
+
+        private async UniTask<T> HandleWithSubscribeAsync<T>(RetryHandler<T> handler)
+        {
+            using var retrying = handler.OnRetrying.Subscribe(onConnectRetrying.OnNext);
+            using var retried = handler.OnRetried.Subscribe(onConnectRetried.OnNext);
+            var result = await handler.HandleAsync();
+            return result;
         }
 
         public async UniTask<long> GetDownloadSizeAsync(string assetName)
@@ -85,13 +119,18 @@ namespace Extreal.Integration.AssetWorkflow.Addressables
 
         public async UniTask<AssetDisposable<T>> LoadAssetAsync<T>(string assetName)
         {
-            var handle = Addressables.LoadAssetAsync<T>(assetName);
-            var asset = await handle.Task.ConfigureAwait(true);
-            if (handle.Status == AsyncOperationStatus.Failed)
+            Func<UniTask<AssetDisposable<T>>> func = async () =>
             {
-                ReleaseHandle(handle);
-            }
-            return new AssetDisposable<T>(asset);
+                var handle = Addressables.LoadAssetAsync<T>(assetName);
+                var asset = await handle.Task.ConfigureAwait(true);
+                if (handle.Status == AsyncOperationStatus.Failed)
+                {
+                    ReleaseHandle(handle);
+                }
+                return new AssetDisposable<T>(asset);
+            };
+            using var handler = RetryHandler<AssetDisposable<T>>.Of(func, _ => true, retryStrategy);
+            return await HandleWithSubscribeAsync(handler);
         }
 
         public UniTask<AssetDisposable<T>> LoadAssetAsync<T>()
@@ -103,13 +142,18 @@ namespace Extreal.Integration.AssetWorkflow.Addressables
             LoadSceneMode loadMode = LoadSceneMode.Additive
         )
         {
-            var handle = Addressables.LoadSceneAsync(assetName, loadMode);
-            var scene = await handle.Task.ConfigureAwait(true);
-            if (handle.Status == AsyncOperationStatus.Failed)
+            Func<UniTask<AssetDisposable<SceneInstance>>> func = async () =>
             {
-                ReleaseHandle(handle);
-            }
-            return new AssetDisposable<SceneInstance>(scene);
+                var handle = Addressables.LoadSceneAsync(assetName, loadMode);
+                var scene = await handle.Task.ConfigureAwait(true);
+                if (handle.Status == AsyncOperationStatus.Failed)
+                {
+                    ReleaseHandle(handle);
+                }
+                return new AssetDisposable<SceneInstance>(scene);
+            };
+            using var handler = RetryHandler<AssetDisposable<SceneInstance>>.Of(func, _ => true, retryStrategy);
+            return await HandleWithSubscribeAsync(handler);
         }
 
         private static void ReleaseHandle(AsyncOperationHandle handle)
