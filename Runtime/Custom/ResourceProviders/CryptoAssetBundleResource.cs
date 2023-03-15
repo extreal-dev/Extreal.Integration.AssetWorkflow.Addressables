@@ -152,8 +152,6 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
             }
 
             bundleFilePath = Application.persistentDataPath + "/com.unity.addressables/Decrypted/" + Path.GetFileName(path);
-
-            Debug.LogWarning(Application.persistentDataPath);
         }
 
         private void RequestOperationToGetAssetBundleCompleted(AsyncOperation op)
