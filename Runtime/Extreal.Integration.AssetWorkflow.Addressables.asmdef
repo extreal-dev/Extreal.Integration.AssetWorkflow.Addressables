@@ -7,8 +7,7 @@
         "Unity.Addressables",
         "Unity.ResourceManager",
         "UniTask",
-        "UniRx",
-        "Extreal.Framework.Analyzer"
+        "UniRx"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
