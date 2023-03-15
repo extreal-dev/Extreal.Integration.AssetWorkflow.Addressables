@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using Extreal.Core.Logging;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -150,7 +151,9 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
                 loadType = LoadType.Local;
             }
 
-            bundleFilePath = Path.GetFullPath("Temp/com.unity.addressables/Decrypted/" + Path.GetFileName(path));
+            bundleFilePath = Application.persistentDataPath + "/com.unity.addressables/Decrypted/" + Path.GetFileName(path);
+
+            Debug.LogWarning(Application.persistentDataPath);
         }
 
         private void RequestOperationToGetAssetBundleCompleted(AsyncOperation op)
@@ -170,6 +173,12 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
                 if (File.Exists(bundleFilePath))
                 {
                     File.Delete(bundleFilePath);
+
+                    var dir = Path.GetDirectoryName(bundleFilePath);
+                    if (!Directory.EnumerateFileSystemEntries(dir).Any())
+                    {
+                        Directory.Delete(dir);
+                    }
                 }
             }
         }
