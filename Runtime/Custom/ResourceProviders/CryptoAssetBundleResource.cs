@@ -217,7 +217,7 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
 
             var uwr = new UnityWebRequest(path)
             {
-                disposeDownloadHandlerOnDispose = true,
+                disposeDownloadHandlerOnDispose = false,
                 downloadHandler = new DownloadHandlerFileWithDecryption(bundleFilePath, cryptoStreamFactory, options)
             };
 
@@ -239,6 +239,7 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
             uwrAsyncOperation = uwr.SendWebRequest();
             uwrAsyncOperation.completed += _ =>
             {
+                uwr.downloadHandler.Dispose();
                 if (uwr.result != UnityWebRequest.Result.Success)
                 {
                     var exception = new RemoteProviderException
@@ -247,6 +248,7 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
                         provideHandle.Location
                     );
                     provideHandle.Complete<CryptoAssetBundleResource>(null, false, exception);
+                    uwr.Dispose();
                     return;
                 }
                 GetAssetBundleFromCacheOrFile();
@@ -279,7 +281,7 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
                     ? UnityWebRequestAssetBundle.GetAssetBundle(localBundleFilePath, cachedBundle, options.Crc)
                     : UnityWebRequestAssetBundle.GetAssetBundle(localBundleFilePath, cachedBundle);
 #else
-                webRequest = UnityWebRequestAssetBundle.GetAssetBundle(localBundleFilePath, cachedBundle, options.Crc);
+                uwr = UnityWebRequestAssetBundle.GetAssetBundle(localBundleFilePath, cachedBundle, options.Crc);
 #endif
             }
             else

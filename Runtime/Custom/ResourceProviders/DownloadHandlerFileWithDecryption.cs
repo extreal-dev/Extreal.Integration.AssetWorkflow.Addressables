@@ -15,11 +15,10 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
         private readonly string path;
         private readonly ICryptoStreamFactory cryptoStreamFactory;
         private readonly AssetBundleRequestOptions options;
+        private readonly MemoryStream memoryStream;
+        private readonly CryptoStream decryptor;
 
         private FileStream fileStream;
-        private readonly MemoryStream memoryStream;
-        private CryptoStream decryptor;
-        private bool isInit = true;
         private long readPosition;
 
         private const int BufferSize = 4096;
@@ -49,7 +48,9 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
             this.cryptoStreamFactory = cryptoStreamFactory;
             this.options = options;
 
+            fileStream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write);
             memoryStream = new MemoryStream();
+            decryptor = cryptoStreamFactory.CreateDecryptStream(memoryStream, options);
         }
 
         /// <inheritdoc/>
@@ -57,18 +58,10 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
         {
             _ = memoryStream.Seek(0, SeekOrigin.End);
             memoryStream.Write(data, 0, dataLength);
-            if (isInit)
-            {
-                _ = memoryStream.Seek(0, SeekOrigin.Begin);
-                fileStream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write);
-                decryptor = cryptoStreamFactory.CreateDecryptStream(memoryStream, options);
-                readPosition = memoryStream.Position;
-                isInit = false;
-            }
 
             var buffer = new byte[BufferSize];
             _ = memoryStream.Seek(readPosition, SeekOrigin.Begin);
-            while (memoryStream.Length - memoryStream.Position >= BufferSize)
+            while (memoryStream.Length - memoryStream.Position > BufferSize)
             {
                 _ = decryptor.Read(buffer, 0, BufferSize);
                 fileStream.Write(buffer, 0, BufferSize);
@@ -83,7 +76,6 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
         {
             if (readPosition != memoryStream.Length)
             {
-                _ = memoryStream.Seek(readPosition, SeekOrigin.Begin);
                 try
                 {
                     decryptor.CopyTo(fileStream);
@@ -97,14 +89,33 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
                 }
             }
 
-            fileStream.Dispose();
-            decryptor.Dispose();
+            fileStream.Flush();
         }
 
         /// <inheritdoc/>
         public override void Dispose()
         {
+            var shouldDeleteFile = fileStream.Length == 0;
+
+            try
+            {
+                decryptor.Dispose();
+            }
+            catch (Exception e)
+            {
+                if (Logger.IsDebug())
+                {
+                    Logger.LogDebug("Failed to dispose CryptoStream", e);
+                }
+            }
             memoryStream.Dispose();
+            fileStream.Dispose();
+
+            if (shouldDeleteFile)
+            {
+                File.Delete(path);
+            }
+
             base.Dispose();
         }
     }
