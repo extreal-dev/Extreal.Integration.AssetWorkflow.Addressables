@@ -1,0 +1,27 @@
+{
+    "name": "Extreal.Integration.AssetWorkflow.Addressables.Editor",
+    "rootNamespace": "Extreal.Integration.AssetWorkflow.Addressables.Editor",
+    "references": [
+        "Extreal.Core.Logging",
+        "Extreal.Core.Common",
+        "Extreal.Integration.AssetWorkflow.Addressables",
+        "Unity.Addressables",
+        "Unity.Addressables.Editor",
+        "Unity.ResourceManager",
+        "Unity.ScriptableBuildPipeline",
+        "Unity.ScriptableBuildPipeline.Editor",
+        "UniTask",
+        "UniRx"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

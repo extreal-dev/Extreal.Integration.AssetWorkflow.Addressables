@@ -1,0 +1,16 @@
+{
+  "name": "jp.co.tis.extreal.integration.assetworkflow.addressables",
+  "version": "1.0.0-next.1",
+  "displayName": "Extreal.Integration.AssetWorkflow.Addressables",
+  "unity": "2021.3",
+  "author": {
+    "name": "TIS Inc."
+  },
+  "dependencies": {
+    "jp.co.tis.extreal.core.logging": "1.0.0",
+    "jp.co.tis.extreal.core.common": "1.0.0-next.1",
+    "com.unity.addressables": "1.19.19",
+    "com.cysharp.unitask": "2.3.3",
+    "com.neuecc.unirx": "7.1.0"
+  }
+}

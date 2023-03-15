@@ -1,0 +1,21 @@
+{
+    "name": "Extreal.Integration.AssetWorkflow.Addressables",
+    "rootNamespace": "Extreal.Integration.AssetWorkflow.Addressables",
+    "references": [
+        "Extreal.Core.Logging",
+        "Extreal.Core.Common",
+        "Unity.Addressables",
+        "Unity.ResourceManager",
+        "UniTask",
+        "UniRx"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
