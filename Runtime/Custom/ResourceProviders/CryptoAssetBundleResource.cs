@@ -151,9 +151,7 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
                 loadType = LoadType.Local;
             }
 
-            bundleFilePath = Application.temporaryCachePath +
-                             $"/{nameof(Extreal.Integration.AssetWorkflow.Addressables)}/Decrypted/" +
-                             Path.GetFileName(path);
+            bundleFilePath = Application.temporaryCachePath + $"/{nameof(Extreal)}/Decrypted/" + Path.GetFileName(path);
             if (Logger.IsDebug())
             {
                 Logger.LogDebug($"path: {path}");
