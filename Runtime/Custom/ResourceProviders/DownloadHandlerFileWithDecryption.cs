@@ -13,12 +13,10 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
     public class DownloadHandlerFileWithDecryption : DownloadHandlerScript
     {
         private readonly string path;
-        private readonly ICryptoStreamFactory cryptoStreamFactory;
-        private readonly AssetBundleRequestOptions options;
         private readonly MemoryStream memoryStream;
         private readonly CryptoStream decryptor;
 
-        private FileStream fileStream;
+        private readonly FileStream fileStream;
         private long readPosition;
 
         private const int BufferSize = 4096;
@@ -45,8 +43,6 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
             }
 
             this.path = path;
-            this.cryptoStreamFactory = cryptoStreamFactory;
-            this.options = options;
 
             fileStream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write);
             memoryStream = new MemoryStream();
