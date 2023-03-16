@@ -151,7 +151,14 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
                 loadType = LoadType.Local;
             }
 
-            bundleFilePath = Application.persistentDataPath + "/com.unity.addressables/Decrypted/" + Path.GetFileName(path);
+            bundleFilePath = Application.temporaryCachePath +
+                             $"/{nameof(Extreal.Integration.AssetWorkflow.Addressables)}/Decrypted/" +
+                             Path.GetFileName(path);
+            if (Logger.IsDebug())
+            {
+                Logger.LogDebug($"path: {path}");
+                Logger.LogDebug($"bundleFilePath: {bundleFilePath}");
+            }
         }
 
         private void RequestOperationToGetAssetBundleCompleted(AsyncOperation op)

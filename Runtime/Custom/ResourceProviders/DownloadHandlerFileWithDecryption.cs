@@ -74,6 +74,10 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
         /// <inheritdoc/>
         protected override void CompleteContent()
         {
+            if (Logger.IsDebug())
+            {
+                Logger.LogDebug($"readPosition: {readPosition} memoryStream.Length: {memoryStream.Length}");
+            }
             if (readPosition != memoryStream.Length)
             {
                 try
