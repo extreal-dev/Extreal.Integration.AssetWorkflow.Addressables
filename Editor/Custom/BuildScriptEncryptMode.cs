@@ -57,6 +57,13 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Editor.Custom
 
         internal List<ObjectInitializationData> ResourceProviderData => m_ResourceProviderData.ToList();
 
+        //========================================================================================
+        // POSTSCRIPT
+        // Hold the field for logging whether to encrypt the asset bundle.
+        private List<string> outputtedAssetGroups = new List<string>();
+        // POSTSCRIPT ENDS HERE
+        //========================================================================================
+
         /// <inheritdoc />
         public override bool CanBuildData<T>()
         {
@@ -66,6 +73,13 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Editor.Custom
         /// <inheritdoc />
         protected override TResult BuildDataImplementation<TResult>(AddressablesDataBuilderInput builderInput)
         {
+            //========================================================================================
+            // POSTSCRIPT
+            // Clear 'outputtedAssetGroups' list first since it has information from the previous build.
+            outputtedAssetGroups.Clear();
+            // POSTSCRIPT ENDS HERE
+            //========================================================================================
+
             TResult result = default(TResult);
 
             var timer = new Stopwatch();
@@ -1126,10 +1140,22 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Editor.Custom
                         || options.UseUnityWebRequestForLocalBundles))
                 {
                     Encrypt(srcPath, targetPath, schema, options);
+
+                    if (!outputtedAssetGroups.Contains(assetGroup.name))
+                    {
+                        Debug.Log($"<color=cyan>Encrypted '{assetGroup.name}'</color>");
+                        outputtedAssetGroups.Add(assetGroup.name);
+                    }
                 }
                 else
                 {
                     MoveFileToDestinationWithTimestampIfDifferent(srcPath, targetPath, Log);
+
+                    if (!outputtedAssetGroups.Contains(assetGroup.name))
+                    {
+                        Debug.Log($"<color=cyan>NOT encrypted '{assetGroup.name}'</color>");
+                        outputtedAssetGroups.Add(assetGroup.name);
+                    }
                 }
                 // POSTSCRIPT ENDS HERE
                 //========================================================================================
