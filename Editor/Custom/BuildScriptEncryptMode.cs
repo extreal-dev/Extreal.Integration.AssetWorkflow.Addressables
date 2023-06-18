@@ -20,6 +20,7 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Editor.Custom
     [CreateAssetMenu(fileName = "BuildScriptEncryptMode.asset", menuName = "Extreal/Integration.AssetWorkflow.Addressables.Editor/Encrypt Build Script")]
     public class BuildScriptEncryptMode : BuildScriptPackedMode
     {
+        private AddressableAssetSettings addressableSettings;
         private readonly List<BundleResult> bundleResults = new List<BundleResult>();
         private readonly HashSet<string> doneAssetGroups = new HashSet<string>();
 
@@ -29,6 +30,7 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Editor.Custom
         /// <inheritdoc />
         protected override TResult BuildDataImplementation<TResult>(AddressablesDataBuilderInput builderInput)
         {
+            addressableSettings = builderInput.AddressableSettings;
             bundleResults.Clear();
             doneAssetGroups.Clear();
             return base.BuildDataImplementation<TResult>(builderInput);
@@ -60,10 +62,8 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Editor.Custom
         {
             var outputBundleName = base.ConstructAssetBundleName(assetGroup, schema, info, assetBundleName);
 
-            if (assetGroup != null && schema != null)
-            {
-                bundleResults.Add(new BundleResult(assetGroup, schema, info, assetBundleName, outputBundleName));
-            }
+            assetGroup ??= addressableSettings.DefaultGroup;
+            bundleResults.Add(new BundleResult(assetGroup, schema, info, outputBundleName));
 
             return outputBundleName;
         }
@@ -91,7 +91,7 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Editor.Custom
             }
             doneAssetGroups.Add(assetGroupName);
 
-            var message = encrypted ? "Encrypted" : "Not encrypted";
+            var message = encrypted ? "ENCRYPTED" : "NOT ENCRYPTED";
             Debug.Log($"<color=cyan>{message} '{assetGroupName}' {bundleResult.OutputBundleName}</color>");
         }
 
@@ -101,13 +101,13 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Editor.Custom
 
         private bool IsUseWebRequest(BundleResult bundleResult)
         {
-            var loadPath = bundleResult.Schema.LoadPath.GetValue(bundleResult.AssetGroup.Settings);
+            var loadPath = bundleResult.Schema.LoadPath.GetValue(addressableSettings);
             return ResourceManagerConfig.ShouldPathUseWebRequest(loadPath)
                    || bundleResult.Schema.UseUnityWebRequestForLocalBundles;
         }
 
         [SuppressMessage("CodeCracker", "CC0022")]
-        private static void Encrypt(BundleResult bundleResult)
+        private void Encrypt(BundleResult bundleResult)
         {
             var builtBundlePath = ToBuiltBundlePath(bundleResult);
             var srcPath = builtBundlePath + ".src";
@@ -145,9 +145,9 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Editor.Custom
             File.Move(builtBundlePath, srcPath);
         }
 
-        private static string ToBuiltBundlePath(BundleResult bundleResult)
+        private string ToBuiltBundlePath(BundleResult bundleResult)
         {
-            var buildPath = bundleResult.Schema.BuildPath.GetValue(bundleResult.AssetGroup.Settings);
+            var buildPath = bundleResult.Schema.BuildPath.GetValue(addressableSettings);
             return Path.Combine(buildPath, bundleResult.OutputBundleName);
         }
 
@@ -161,22 +161,20 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Editor.Custom
             public AddressableAssetGroup AssetGroup { get; }
             public BundledAssetGroupSchema Schema { get; }
             public BundleDetails Info { get; }
-            public string AssetBundleName { get; }
             public string OutputBundleName { get; }
 
             public BundleResult(
                 AddressableAssetGroup assetGroup, BundledAssetGroupSchema schema,
-                BundleDetails info, string assetBundleName, string outputBundleName)
+                BundleDetails info, string outputBundleName)
             {
                 AssetGroup = assetGroup;
                 Schema = schema;
                 Info = info;
-                AssetBundleName = assetBundleName;
                 OutputBundleName = outputBundleName;
             }
         }
 
-        private static AssetBundleRequestOptions ToOptions(BundleResult bundleResult)
+        private AssetBundleRequestOptions ToOptions(BundleResult bundleResult)
         {
             var schema = bundleResult.Schema;
             var info = bundleResult.Info;
