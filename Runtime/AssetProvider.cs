@@ -4,6 +4,7 @@ using System.Runtime.ExceptionServices;
 using Cysharp.Threading.Tasks;
 using Extreal.Core.Common.Retry;
 using Extreal.Core.Common.System;
+using Extreal.Core.Logging;
 using UniRx;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceProviders;
@@ -21,6 +22,8 @@ namespace Extreal.Integration.AssetWorkflow.Addressables
     [SuppressMessage("Design", "CC0091")]
     public class AssetProvider : DisposableBase
     {
+        private static readonly ELogger Logger = LoggingManager.GetLogger(nameof(AssetProvider));
+
         /// <summary>
         /// <para>Invokes just before downloading the asset bundles.</para>
         /// Arg: Asset name
@@ -114,6 +117,10 @@ namespace Extreal.Integration.AssetWorkflow.Addressables
         {
             var handle = Addressables.GetDownloadSizeAsync(assetName);
             var size = await handle.Task.ConfigureAwait(true);
+            if (Logger.IsDebug())
+            {
+                Logger.LogDebug($"Download size: {size}");
+            }
             ReleaseHandle(handle);
             return size;
         }

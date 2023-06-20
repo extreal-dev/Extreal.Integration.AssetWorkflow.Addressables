@@ -19,7 +19,6 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
     {
         private enum LoadType
         {
-            None,
             Local,
             Web
         }
@@ -97,30 +96,14 @@ namespace Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProvider
                 AssetBundle.LoadFromFileAsync(transformedInternalId, options?.Crc ?? 0)
                     .completed += RequestOperationToGetAssetBundleCompleted;
             }
-            else if (loadType == LoadType.Web)
-            {
-                CreateAndSendWebRequest(transformedInternalId);
-            }
             else
             {
-                var exception = new RemoteProviderException
-                (
-                    $"Invalid path in AssetBundleProvider: '{transformedInternalId}'.",
-                    provideHandle.Location
-                );
-                provideHandle.Complete<CryptoAssetBundleResource>(null, false, exception);
+                CreateAndSendWebRequest(transformedInternalId);
             }
         }
 
         private void GetLoadInfo(ProvideHandle handle, out LoadType loadType, out string path)
         {
-            if (options == null)
-            {
-                loadType = LoadType.None;
-                path = null;
-                return;
-            }
-
             path = handle.ResourceManager.TransformInternalId(handle.Location);
             if (ResourceManagerConfig.ShouldPathUseWebRequest(path))
             {
