@@ -5,6 +5,7 @@
         "Extreal.Core.Logging",
         "Extreal.Core.Common",
         "Extreal.Integration.AssetWorkflow.Addressables",
+        "Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProviders",
         "Unity.Addressables",
         "Unity.Addressables.Editor",
         "Unity.ResourceManager",

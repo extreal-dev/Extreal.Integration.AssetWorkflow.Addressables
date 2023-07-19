@@ -1,0 +1,19 @@
+{
+    "name": "Extreal.Integration.AssetWorkflow.Addressables.Custom.ResourceProviders",
+    "rootNamespace": "",
+    "references": [
+        "Unity.ResourceManager",
+        "Extreal.Core.Logging"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [
+        "WebGL"
+    ],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
