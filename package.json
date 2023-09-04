@@ -9,7 +9,7 @@
   "dependencies": {
     "jp.co.tis.extreal.core.logging": "1.2.0-next.1",
     "jp.co.tis.extreal.core.common": "1.1.0-next.4",
-    "com.unity.addressables": "1.21.12",
+    "com.unity.addressables": "1.21.17",
     "com.cysharp.unitask": "2.3.3",
     "com.neuecc.unirx": "7.1.0"
   }
