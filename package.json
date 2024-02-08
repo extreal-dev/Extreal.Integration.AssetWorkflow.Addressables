@@ -1,6 +1,6 @@
 ﻿{
   "name": "jp.co.tis.extreal.integration.assetworkflow.addressables",
-  "version": "1.1.0",
+  "version": "1.2.0-next.3",
   "displayName": "Extreal.Integration.AssetWorkflow.Addressables",
   "unity": "2022.3",
   "author": {
@@ -8,9 +8,9 @@
   },
   "dependencies": {
     "jp.co.tis.extreal.core.logging": "1.2.0",
-    "jp.co.tis.extreal.core.common": "1.1.0",
-    "com.unity.addressables": "1.21.17",
-    "com.cysharp.unitask": "2.3.3",
+    "jp.co.tis.extreal.core.common": "1.2.0-next.1",
+    "com.unity.addressables": "1.21.19",
+    "com.cysharp.unitask": "2.5.0",
     "com.neuecc.unirx": "7.1.0"
   }
 }
