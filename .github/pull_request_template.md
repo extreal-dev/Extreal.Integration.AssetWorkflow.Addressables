@@ -18,6 +18,7 @@
 ## 変更影響
 
 - [ ] GuideのReleaseページに変更内容が追加されることを確認しました
+- [ ] 後方互換が崩れている場合はGuideのReleaseページのUpgrade guideに対応方法が追加されることを確認しました
 - [ ] GuideのModuleページ（機能ページ）に変更が反映されることを確認しました
 - [ ] GuideのLearningページに変更が反映されることを確認しました
 - [ ] Sample Applicationに変更が反映されることを確認しました
